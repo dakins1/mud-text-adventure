@@ -3,6 +3,7 @@ package mud
 import org.junit.Test
 import org.junit.Assert._
 import org.junit.Before
+import mud.Item
 
 /**
  * Test code for the room. These tests should pass at the end of the first assignment.

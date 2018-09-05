@@ -1,7 +1,10 @@
+
 package mud
 
 import org.junit._
 import org.junit.Assert._
+import mud.Item
+import mud.Player
 
 class TestPlayer {
   private var player: Player = null
@@ -26,3 +29,4 @@ class TestPlayer {
     assertEquals(item, player.getFromInventory("Homework"))
   }
 }
+

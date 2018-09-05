@@ -1,0 +1,18 @@
+3
+Home
+This is your house
+1,-1,2,-1,-1,-1
+1
+chair,you sit here
+CSI
+This is CSI
+-1,0,-1,-1,-1,-1
+2
+computer,your best friend
+desk,your computer's friend
+City Vista
+This is where you live.
+-1,-1,-1,0,-1,-1
+2
+bed,where you sleep
+pillow,something you sleep with
