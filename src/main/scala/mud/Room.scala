@@ -10,32 +10,38 @@ class Room(
     ) {
   
   val directionArray = Array("north","south","east","west","up","down")
-  
   def items = _items
   
+  def removeItem(itemToRemove:Item):Unit = _items = _items.filter(i => i.name != itemToRemove.name)
+  def addItem(itemToAdd:Item):Unit = _items ::= itemToAdd
+  
   def fullDescription(): String = {
-    var masterString:String = (name + "\n" + desc + "\n" + "Exits: \n")
+    var masterString:String = (name + "\n" + desc + "\n")
+    masterString += "Available items: \n"
+    if (items.size >= 1) items.foreach(s => masterString += s.name + " - " + s.desc + "\n") 
+    else masterString += "None\n"   
+    //for (i <- 0 to 5) {
+      //if (exits(i) != None) masterString += Room.rooms(exits(i).get).name + " is to the " + directionArray(i) + "\n"
+    //}
+    masterString += "Exits: \n"
     for (i <- 0 to 5) {
       if (exits(i) != None) masterString += Room.rooms(exits(i).get).name + " is to the " + directionArray(i) + "\n"
     }
-    masterString += "Available items: "
-    if (items.size > 1) items.foreach(s => masterString += s.name + " - " + s.desc + "\n") else masterString += "None"   
+    //if (items.size >= 1) items.foreach(s => masterString += s.name + " - " + s.desc + "\n") 
+    //else masterString += "None\n"   
     masterString
   }
   
   def getExit(dir: Int): Option[Room] = {
-    if(exits(dir) == None) None else
-    Some(Room.rooms(exits(dir).get))
-    //exits(dir).map(Room.rooms)
+    //if(exits(dir) == None) None else
+    //Some(Room.rooms(exits(dir).get))
+    exits(dir).map(Room.rooms)
   }
 
-  override def toString(): String = {
-    name+"\n"+desc
-  }
 }
 
 object Room {
-  val rooms = readRooms()
+  val rooms = readRooms() 
   
   def readRooms(): Array[Room] = {
     val source = Source.fromFile("map.txt")
@@ -57,5 +63,6 @@ object Room {
     }
     new Room(name, desc, exits, items)
   }
+  
   
 }

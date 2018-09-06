@@ -14,23 +14,34 @@ class Player (
     case "west"  => move(3)
     case "up"    => move(4)
     case "down"  => move(5)
-    case "drop"  => getFromInventory(command.split(" ")(1))
-    case "grab"  => addToInventory(???)
+    case "look"  => println(position.fullDescription())
+    case "drop"  => dropFromInventory(command.split(" ")(1))
+    case "grab" if (command.split(" ").size == 2)  => addToInventory(command.split(" ")(1))
     case "i"     => println(inventoryListing)
-    case _       => println("??????????? \n ???? ??? \n??? ?????????? ? \nTry being better???")
+    case _       => println("??????????? \n ???? ??? \n??? ?????????? ? \n       ???\n?\n")
   }
   
   
-  
-  def getFromInventory(item:String):Option[Item] = {
-    
+  def dropFromInventory(itemToDrop:String):Unit = {
+    val itemOp = items.find(i  => (i.name == itemToDrop))
+    if (itemOp != None) {
+      _items = _items.filter(s => s != itemOp.get)
+      println("You dropped " + itemOp.get.name + " from your inventory.\n")
+      position.addItem(itemOp.get)
+    }
+    else println("You don't have that in your inventory.\n")
   }
+  
   
   def addToInventory(itemName:String):Unit = {
-    position.items.find(i => (i.name == itemName))
-    if None
-    else add
-    //woohoo!
+    val itemOp = position.items.find(i => (i.name == itemName))
+    if (itemOp != None)  {
+      _items ::= itemOp.get
+      println(itemOp.get.name + " has been added to your inventory.\n")
+      position.removeItem(itemOp.get)      
+    }
+    else println("Leon already picked up this OP weapon.\n")
+    
   }
   
   

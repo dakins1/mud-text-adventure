@@ -2,14 +2,14 @@ package mud
 
 object Main extends App {
   val p1 = new Player(Room.rooms(0), Nil)
-  println("Hello, and welcome to my mud. \\|^.^|/ \n")
+  println("\n\n\nHello, and welcome to my mud. \\|^.^|/ \n")
   instructions
   
   println("You start out at " + Room.rooms(0).name + "\n")
   println(p1.position.fullDescription() + "\n")
   
   var input = readLine(">")
-  while (input != "I suck eggs, and I want to quit.") {
+  while (input != "Dillon is better than me.") {
     p1.processCommand(input)
     input = readLine(">")
   }
@@ -25,7 +25,8 @@ object Main extends App {
 -To pick up an item, type "grab" and then the name of the item. 
 -To drop an item, type "drop" and then the name of the item. 
 -To view your inventory, simply type "i".
--If you want to quit, type "I suck eggs, and I want to quit." It has to be exactly that.
+-To look around your current room, type "look".
+-If you want to quit, type "Dillon is better than me." It has to be exactly that.
 -Make sure to keep all commands lowercase. Have fun.
 """)
   }

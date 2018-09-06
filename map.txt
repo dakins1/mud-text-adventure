@@ -1,18 +1,26 @@
 3
-Home
-This is your house
+Bang Chamber
+A room with a bunk bed. There is intense mood lighting.
 1,-1,2,-1,-1,-1
-1
-chair,you sit here
-CSI
-This is CSI
+2
+lava_lamp,a cool device from the 60s. It adds a mood to the room.
+ping_pong_tray,a tray full of items necessary to play ping pong
+Smelly Bush
+This bush is off the beaten path, but has clearly been recently rustled by somebody. There is an odd smell of skunk. 
 -1,0,-1,-1,-1,-1
 2
-computer,your best friend
-desk,your computer's friend
-City Vista
-This is where you live.
+aperture,a mysterious glass aperture. The inside is coated with an odd residue.
+bag,a drawstring bag
+Prassel 310
+Room 310 of the Prassel dormitory. The entire room smells like sweaty buttcrack.
 -1,-1,-1,0,-1,-1
-2
-bed,where you sleep
-pillow,something you sleep with
+9
+xbox,the first xbox one from P310
+xbox_2,the second xbox one from P310
+xbox_3,the THIRD xbox one from P310
+tv,the first tv from P310
+tv_2,the second tv from P310
+tv_3,the THIRD tv from P310
+flatscreen, a 13-inch, flat-screen TV
+board,a white board with an "argument score" on it. It seems like "Dillon" is winning.
+dresser,a dresser that looks oddly like the dressers from Herndon...
