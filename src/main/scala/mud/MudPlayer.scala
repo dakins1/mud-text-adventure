@@ -22,9 +22,23 @@ class Player (
   
   
   
-  def getFromInventory(item:String):Option[Item] = ???
-  def addToInventory(item:Item):Unit = ???
-  def inventoryListing:String = ???
+  def getFromInventory(item:String):Option[Item] = {
+    
+  }
+  
+  def addToInventory(itemName:String):Unit = {
+    position.items.find(i => (i.name == itemName))
+    if None
+    else add
+    //woohoo!
+  }
+  
+  
+  def inventoryListing:String = {
+    var inventory = ""
+    for (i <- _items) inventory += (i.name + " - " + i.desc + "\n")
+    inventory
+  }
   
   def move(dir:Int):Unit = {
     val newRoom:Option[Room] = position.getExit(dir)
