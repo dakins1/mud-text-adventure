@@ -20,15 +20,10 @@ class Room(
     masterString += "Available items: \n"
     if (items.size >= 1) items.foreach(s => masterString += s.name + " - " + s.desc + "\n") 
     else masterString += "None\n"   
-    //for (i <- 0 to 5) {
-      //if (exits(i) != None) masterString += Room.rooms(exits(i).get).name + " is to the " + directionArray(i) + "\n"
-    //}
     masterString += "Exits: \n"
     for (i <- 0 to 5) {
       if (exits(i) != None) masterString += Room.rooms(exits(i).get).name + " is to the " + directionArray(i) + "\n"
-    }
-    //if (items.size >= 1) items.foreach(s => masterString += s.name + " - " + s.desc + "\n") 
-    //else masterString += "None\n"   
+    }  
     masterString
   }
   

@@ -12,7 +12,7 @@ This bush is off the beaten path, but has clearly been recently rustled by someb
 aperture,a mysterious glass aperture. The inside is coated with an odd residue.
 bag,a drawstring bag
 Prassel 310
-Room 310 of the Prassel dormitory. The entire room smells like sweaty buttcrack.
+Room 310 of the Prassel dormitory. The entire room smells awful.
 -1,-1,-1,0,-1,-1
 9
 xbox,the first xbox one from P310

@@ -1,4 +1,5 @@
 package mud
+import scala.io.StdIn._
 
 object Main extends App {
   val p1 = new Player(Room.rooms(0), Nil)
@@ -13,13 +14,7 @@ object Main extends App {
     p1.processCommand(input)
     input = readLine(">")
   }
-  
-
-  
-  
-  
-
-  
+   
   def instructions():Unit = {
     println("""-To move around, type in a direction (i.e. north, south, east, etc.).
 -To pick up an item, type "grab" and then the name of the item. 
@@ -35,12 +30,4 @@ object Main extends App {
     println(p1.position.fullDescription)
   }
   
-  /*
-  p1.processCommand(readLine("Enter command: "))
-  println(p1.position.fullDescription())
-  
-  p1.processCommand(readLine("Enter another command"))
-  println(p1.position.fullDescription)
-  */
-  //Room.rooms foreach println
 }

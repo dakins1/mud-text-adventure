@@ -39,8 +39,8 @@ class Player (
       _items ::= itemOp.get
       println(itemOp.get.name + " has been added to your inventory.\n")
       position.removeItem(itemOp.get)      
-    }
-    else println("Leon already picked up this OP weapon.\n")
+    } else if (items.find(i => (i.name == itemName)) != None) { println ("You already have this item, dummy.")
+    } else println("Leon already picked up this OP weapon.\n")
     
   }
   
