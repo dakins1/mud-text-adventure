@@ -3,9 +3,10 @@ package mud
 import scala.io.Source
 
 class Room(
+    val keyword:String,
     val name: String,
     val desc: String,
-    val exits: Array[Option[Int]],
+    val exits: Array[String],
     private var _items: List[Item]
     ) {
   
@@ -24,18 +25,29 @@ class Room(
       //if (exits(i) != None) masterString += Room.rooms(exits(i).get).name + " is to the " + directionArray(i) + "\n"
     //}
     masterString += "Exits: \n"
+    for (i <- exits) {
+      if (i != "-1") masterString += Room.rooms(i).name + " is to the " +  directionArray(exits.indexOf(i)) + '\n'
+    }
+    
+    /*
     for (i <- 0 to 5) {
-      if (exits(i) != None) masterString += Room.rooms(exits(i).get).name + " is to the " + directionArray(i) + "\n"
+      if (exits(i) != -1) masterString += Room.rooms().name + " is to the " + directionArray(i) + "\n"
     }
     //if (items.size >= 1) items.foreach(s => masterString += s.name + " - " + s.desc + "\n") 
     //else masterString += "None\n"   
+     * 
+     */
     masterString
   }
   
-  def getExit(dir: Int): Option[Room] = {
+  def getExit(dir: Int): String = {
+    exits(dir)
+    
+    
     //if(exits(dir) == None) None else
     //Some(Room.rooms(exits(dir).get))
-    exits(dir).map(Room.rooms)
+    //Room.rooms.get(exits(dir))
+    //exits(dir).map(Room.rooms)
   }
 
 }
@@ -43,25 +55,24 @@ class Room(
 object Room {
   val rooms = readRooms() 
   
-  def readRooms(): Array[Room] = {
+  def readRooms(): Map[String, Room] = {
     val source = Source.fromFile("map.txt")
     val lines = source.getLines()
     val rooms = Array.fill(lines.next().trim.toInt)(readRoom(lines))
     source.close()
-    rooms
+    rooms.toMap
   }
   
-  def readRoom(lines: Iterator[String]): Room = {
+  def readRoom(lines: Iterator[String]): (String,Room) = {
+    val keyword = lines.next()
     val name = lines.next()
     val desc = lines.next()
-    val exits = lines.next().split(",").
-        map(_.trim.toInt).
-        map(i => if(i == -1) None else Some(i))
+    val exits = lines.next().split(",")
     val items = List.fill(lines.next().trim.toInt){
       val Array(name, desc) = lines.next().split(",", 2)
       Item(name.trim, desc.trim)
     }
-    new Room(name, desc, exits, items)
+    keyword -> new Room(keyword, name, desc, exits, items)
   }
   
   

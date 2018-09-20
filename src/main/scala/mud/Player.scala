@@ -52,9 +52,9 @@ class Player (
   }
   
   def move(dir:Int):Unit = {
-    val newRoom:Option[Room] = position.getExit(dir)
-    if (newRoom != None) {
-      _position = newRoom.get 
+    val newRoom:String = position.getExit(dir)
+    if (newRoom != -1) {
+      _position = Room.rooms(newRoom) 
       println(position.fullDescription())
     } else println("Leon's poor map building skills prevent you from going this way.\n")
     }

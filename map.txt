@@ -1,19 +1,22 @@
 3
+bang
 Bang Chamber
 A room with a bunk bed. There is intense mood lighting.
-1,-1,2,-1,-1,-1
+bush,-1,prassel,-1,-1,-1
 2
 lava_lamp,a cool device from the 60s. It adds a mood to the room.
 ping_pong_tray,a tray full of items necessary to play ping pong
+bush
 Smelly Bush
 This bush is off the beaten path, but has clearly been recently rustled by somebody. There is an odd smell of skunk. 
--1,0,-1,-1,-1,-1
+-1,bang,-1,-1,-1,-1
 2
 aperture,a mysterious glass aperture. The inside is coated with an odd residue.
 bag,a drawstring bag
+prassel
 Prassel 310
 Room 310 of the Prassel dormitory. The entire room smells like sweaty buttcrack.
--1,-1,-1,0,-1,-1
+-1,-1,-1,bang,-1,-1
 9
 xbox,the first xbox one from P310
 xbox_2,the second xbox one from P310

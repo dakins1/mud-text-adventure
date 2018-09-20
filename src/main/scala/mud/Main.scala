@@ -1,11 +1,12 @@
 package mud
+import io.StdIn._
 
 object Main extends App {
-  val p1 = new Player(Room.rooms(0), Nil)
+  val p1 = new Player(Room.rooms("bang"), Nil)
   println("\n\n\nHello, and welcome to my mud. \\|^.^|/ \n")
   instructions
   
-  println("You start out at " + Room.rooms(0).name + "\n")
+  println("You start out at " + Room.rooms("bang").name + "\n")
   println(p1.position.fullDescription() + "\n")
   
   var input = readLine(">")
