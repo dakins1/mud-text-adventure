@@ -4,8 +4,13 @@ import akka.actor.Actor
 import scala.io.Source
 import akka.actor.ActorRef
 import akka.actor.Props
+import scala.util.Random
+
+//Mine
 
 class RoomManager extends Actor {
+  import RoomManager._
+  
   private val rooms = readRooms()
   for((_,room) <- rooms) room ! Room.LinkExits(rooms)
   
@@ -25,15 +30,19 @@ class RoomManager extends Actor {
     val items = List.fill(lines.next().trim.toInt){
       val Array(name, desc) = lines.next().split(",", 2)
       Item(name.trim, desc.trim)
-    }
+    }.toBuffer
     keyword -> context.actorOf(Props(new Room(keyword, name, desc, exits, items)), keyword)
   }
   
   def receive = {
+    case GetRandomRoom => {
+      sender ! Player.TakeStartingRoom(rooms("bang"))  
+    }
+    
     case m => println("Unhandled message in RoomManager: "+m)
   }
 }
 
 object RoomManager {
-  
+  case object GetRandomRoom
 }

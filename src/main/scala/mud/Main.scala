@@ -1,12 +1,23 @@
 package mud
 
 import scala.io.StdIn._
+import akka.actor.ActorSystem
+import akka.actor.Props
 
 
 object Main extends App {
-  val p1 = new Player(Room.rooms("bang"), Nil)
+  val system = ActorSystem("ActorMud")
+  val roomManager = system.actorOf(Props(new RoomManager), "RoomManager")
+  val playerManager = system.actorOf(Props(new PlayerManager), "PlayerManager")
+  
+  
+  playerManager ! PlayerManager.NewPlayer("p1")
+  
+  
+  
+  
   println("\n\n\nHello, and welcome to my mud. \\|^.^|/ \n")
-  instructions
+  instructions()
   
   println("You start out at " + Room.rooms("bang").name + "\n")
   println(p1.position.fullDescription() + "\n")
