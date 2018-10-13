@@ -18,7 +18,7 @@ class RoomManager extends Actor {
     val source = Source.fromFile("map.txt")
     val lines = source.getLines()
     val rooms = Array.fill(lines.next().trim.toInt)(readRoom(lines))
-    source.close()
+    source.close() 
     rooms.toMap
   }
   
@@ -31,20 +31,21 @@ class RoomManager extends Actor {
       val Array(name, desc) = lines.next().split(",", 2)
       Item(name.trim, desc.trim)
     }.toBuffer
-    keyword -> context.actorOf(Props(new Room(keyword, name, desc, exits, items)), keyword)
+    println(name)
+    keyword -> context.actorOf(Props(new Room(keyword, name, desc, exits, items)), name)
   }
   
-  def receive = {
+  def receive = { 
     case GetRandomRoom(player) => {
       val r = rooms.toArray
       sender ! PlayerManager.TakeStartingRoom(r(Random.nextInt(r.size))._2, player)  
     }
-    
     case m => println("Unhandled message in RoomManager: "+m)
   }
 }
 
 object RoomManager {
+  
   //Messages from Player Manager
   case class GetRandomRoom(player:ActorRef)
 }

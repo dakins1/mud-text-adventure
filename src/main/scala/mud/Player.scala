@@ -56,7 +56,7 @@ class Player(val name: String) extends Actor {
     case "up" => move(4)
     case "down" => move(5)
     case "look" => position ! Room.PrintDescription
-    case "drop" => dropInv(command.split(" ")(1))
+    case "drop" if (command.split(" ").size == 2) => dropInv(command.split(" ")(1))
     case "grab" if (command.split(" ").size == 2) => addInv(command.split(" ")(1))
     case "i" => ps.println(inventoryListing)
     case _ => ps.println("??????????? \n ???? ??? \n??? ?????????? ? \n       ???\n?\n")
