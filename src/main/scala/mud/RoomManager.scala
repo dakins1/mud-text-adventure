@@ -35,8 +35,9 @@ class RoomManager extends Actor {
   }
   
   def receive = {
-    case GetRandomRoom => {
-      sender ! Player.TakeStartingRoom(rooms("bang"))  
+    case GetRandomRoom(player) => {
+      val r = rooms.toArray
+      sender ! PlayerManager.TakeStartingRoom(r(Random.nextInt(r.size))._2, player)  
     }
     
     case m => println("Unhandled message in RoomManager: "+m)
@@ -44,5 +45,6 @@ class RoomManager extends Actor {
 }
 
 object RoomManager {
-  case object GetRandomRoom
+  //Messages from Player Manager
+  case class GetRandomRoom(player:ActorRef)
 }
