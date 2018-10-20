@@ -11,7 +11,7 @@ Smelly_Bush
 This bush is off the beaten path, but has clearly been recently rustled by somebody. There is an odd smell of skunk. 
 -1,bang,-1,-1,-1,-1
 2
-aperture,a mysterious glass aperture. The inside is coated with an odd residue.
+aperture,a mysterious glass aperture. The inside is coated with an odd residue
 bag,a drawstring bag
 prassel
 Prassel_310

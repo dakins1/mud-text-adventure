@@ -3,49 +3,71 @@ package mud
 import akka.actor.Actor
 import akka.actor.ActorRef
 import scala.collection.mutable.Buffer
+import java.io.PrintStream
+import java.io.BufferedReader
+import java.net.Socket
 
-class Player(val name: String) extends Actor {
+class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader) extends Actor {
   import Player._
 
   //Data Members
-  private var _position: ActorRef = null //maybe change later...feels dirty
+  private var _position: ActorRef = null
   def position = _position
   private var _items = Buffer.empty[Item]
   def items = _items
-  val ps = Console.out
-  val br = Console.in
+  val directionArray = List("north", "south", "east", "west", "up", "down")
 
   def receive = {
-    case CheckInput => 
+    case Initialize =>
+      ps.print(hello)
+      ps.print(instructions)
+      br.readLine()
+      Main.roomManager ! RoomManager.GetRandomRoom(self)
+      val msg = name + " has joined the game \n"
+      Main.playerManager ! PlayerManager.SendMessage(msg, null, false)
+
+    case CheckInput =>
       if (br.ready()) {
         val input = br.readLine()
         processCommand(input)
       }
-    
-    case TakeExit(roomOp) => {
+
+    case TakeExit(roomOp, dir) => {
       if (roomOp != None) {
+        val msg1 = name + " has gone " + directionArray(dir) + "\n"
+        Main.playerManager ! PlayerManager.SendMessage(msg1, position, true) //send msg to server
         _position = roomOp.get
-        roomOp.get ! Room.PrintDescription
-      } else ps.println("Leon's poor map building skills prevent you from going this way.")
+        roomOp.get ! Room.PrintDescription //should send message to the player
+        val msg2 = name + " has entered the room\n"
+        Main.playerManager ! PlayerManager.SendMessage(msg2, position, true) //send msg to server
+      } else ps.println("Leon's poor map building skills prevent you from going this way.\n")
     }
 
     case PrintRoom(roomDesc) =>
-      ps.println(roomDesc)
+      ps.println(roomDesc) //should print room desc...
+
+    case PrintMessage(str, room, roomSpecial) =>
+      if (roomSpecial) {
+        if (room == position) ps.println(str)
+      } else ps.println(str)
 
     case TakeItem(itemOp) => {
       if (itemOp != None) {
         _items += itemOp.get
-        ps.println(itemOp.get.name + " was added to your inventory")
-      } else ps.println("that item is not here.")
+        ps.println(itemOp.get.name + " was added to your inventory\n")
+        val msg = name + " has grabbed the " + itemOp.get.name + "\n"
+        Main.playerManager ! PlayerManager.SendMessage(msg, position, true)
+      } else ps.println("that item is not here.\n")
     }
 
     case AssignStartingRoom(startPos) => {
       _position = startPos
-      ps.println(hello)
-      ps.println(instructions)
+      val msg = name + " has entered the room\n"
+      Main.playerManager ! PlayerManager.SendMessage(msg, position, true) //send msg to server
       position ! Room.PrintDescription
-
     }
+
+    case m => println("Unhandled message in Player")
   }
 
   def processCommand(command: String): Unit = command.split(" ")(0) match {
@@ -55,6 +77,8 @@ class Player(val name: String) extends Actor {
     case "west" => move(3)
     case "up" => move(4)
     case "down" => move(5)
+    case "say" => processSay(command)
+    case "tell" => processTell(command)
     case "look" => position ! Room.PrintDescription
     case "drop" if (command.split(" ").size == 2) => dropInv(command.split(" ")(1))
     case "grab" if (command.split(" ").size == 2) => addInv(command.split(" ")(1))
@@ -62,12 +86,29 @@ class Player(val name: String) extends Actor {
     case _ => ps.println("??????????? \n ???? ??? \n??? ?????????? ? \n       ???\n?\n")
   }
 
+  //Helper functions
+
+  def processTell(command: String) = {
+    val addressee = command.split(" ")(1)
+    val msg = name + " tells you: " + command.takeRight(command.size - addressee.size - "tell  ".size) + "\n"
+    Main.playerManager ! PlayerManager.SendPrivateMessage(msg, addressee)
+  }
+
+  def processSay(command: String) = {
+    val dialogue = command.takeRight(command.size - "say ".size) + "\n"
+    val msg = name + " says: " + dialogue
+    Main.playerManager ! PlayerManager.SendMessage(msg, position, true)
+    ps.println("You said: " + dialogue)
+  }
+
   def dropInv(itemToDrop: String): Unit = {
     val itemOp = items.find(i => (i.name == itemToDrop))
     if (itemOp != None) {
       _items -= itemOp.get
-      println("You dropped " + itemOp.get.name + " from your inventory.\n")
+      ps.println("You dropped " + itemOp.get.name + " from your inventory.\n")
       position ! Room.DropItem(itemOp.get)
+      val msg = name + " dropped the " + itemOp.get.name + "\n"
+      Main.playerManager ! PlayerManager.SendMessage(msg, position, true)
     } else ps.println("You don't have that in your inventory.\n")
   }
 
@@ -85,16 +126,20 @@ class Player(val name: String) extends Actor {
     position ! Room.GetExit(dir)
   }
 
-  val hello = "\n\n\nHello, and welcome to my mud. \\|^.^|/ \n"
+  //Game info
+
+  val hello = "\n\nHello, and welcome to my mud. \\|^.^|/ \n"
   val instructions = """-To move around, type in a direction (i.e. north, south, east, etc.).
 -To pick up an item, type "grab" and then the name of the item. 
 -To drop an item, type "drop" and then the name of the item. 
 -To view your inventory, simply type "i".
 -To look around your current room, type "look".
--If you want to quit, type "Dillon is better than me." It has to be exactly that.
+-If you want to quit, type "quit".
 -Make sure to keep all commands lowercase. Have fun.
+
+Press enter to continue
+
 """
-  
 
 }
 object Player {
@@ -103,9 +148,11 @@ object Player {
 
   //Messages from room
   case class PrintRoom(roomDesc: String)
-  case class TakeExit(roomOp: Option[ActorRef])
+  case class TakeExit(roomOp: Option[ActorRef], dir: Int)
   case class TakeItem(itemOp: Option[Item])
 
   //Messages from PlayerManager
   case class AssignStartingRoom(startPos: ActorRef)
+  case class PrintMessage(str: String, room: ActorRef, roomSpecial: Boolean)
+  case object Initialize
 }

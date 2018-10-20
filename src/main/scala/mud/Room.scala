@@ -20,7 +20,7 @@ class Room(
   def receive = {
 
     case GetExit(dir) =>
-      sender ! Player.TakeExit(getExit(dir))
+      sender ! Player.TakeExit(getExit(dir), dir)
 
     case GetItem(itemName: String) => {
       val i = items.find(i => i.name == itemName)
@@ -33,14 +33,13 @@ class Room(
 
     case PrintDescription =>
       {
-        var masterString: String = (name + "\n" + desc + "\n")
+        var masterString: String = ("\n " + name + "\n" + desc + "\n")
         masterString += "Available items: \n"
         if (items.size >= 1) items.foreach(s => masterString += s.name + " - " + s.desc + "\n")
         else masterString += "None\n"
         masterString += "Exits: \n"
         for (e <- exits) {
           if (e != None) {
-            println(e.get.path.name.toString())
             masterString += e.get.path.name.toString() + " is to the " + directionArray(exits.indexOf(e)).toString() + '\n'
             //Main.roomManager ! RoomManager.PrintExitsRequest(e, sender) //directionArray(exits.indexOf(i)) + '\n'
           }
@@ -54,23 +53,11 @@ class Room(
       println("Unhandled message in Room: " + m)
   }
 
-  val directionArray = Array("north", "south", "east", "west", "up", "down")
+  val directionArray = List("north", "south", "east", "west", "up", "down")
   def items = _items
 
   def removeItem(itemToRemove: Item): Unit = _items = _items.filter(i => i.name != itemToRemove.name)
   def addItem(itemToAdd: Item): Unit = _items += itemToAdd
-
-  /*  def fullDescription(): String = { //TODO fix later
-    var masterString: String = (name + "\n" + desc + "\n")
-    masterString += "Available items: \n"
-    if (items.size >= 1) items.foreach(s => masterString += s.name + " - " + s.desc + "\n")
-    else masterString += "None\n"
-    masterString += "Exits: \n"
-    for (e <- exitKeys) {
-      if (e != -1) Main.roomManager ! RoomManager.PrintExitsRequest(e, sender) //directionArray(exits.indexOf(i)) + '\n'
-    }
-    masterString
-  }*/
 
   def getExit(dir: Int): Option[ActorRef] = {
     exits(dir)
