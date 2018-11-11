@@ -9,6 +9,7 @@ import java.net.Socket
 
 class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader) extends Actor {
   import Player._
+  import CharacterMessages._
 
   //Data Members
   private var _position: ActorRef = null
@@ -22,9 +23,9 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
       ps.print(hello)
       ps.print(instructions)
       br.readLine()
-      Main.roomManager ! RoomManager.GetRandomRoom(self)
+      Server.roomManager ! RoomManager.GetRandomRoom(self)
       val msg = name + " has joined the game \n"
-      Main.playerManager ! PlayerManager.SendMessage(msg, null, false)
+      Server.playerManager ! PlayerManager.SendMessage(msg, null, false)
 
     case CheckInput =>
       if (br.ready()) {
@@ -35,11 +36,13 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
     case TakeExit(roomOp, dir) => {
       if (roomOp != None) {
         val msg1 = name + " has gone " + directionArray(dir) + "\n"
-        Main.playerManager ! PlayerManager.SendMessage(msg1, position, true) //send msg to server
+        Server.playerManager ! PlayerManager.SendMessage(msg1, position, true) //send msg to server
+        position ! Room.RemoveFromRoom(self)
         _position = roomOp.get
+        position ! Room.AddToRoom(self)
         roomOp.get ! Room.PrintDescription //should send message to the player
         val msg2 = name + " has entered the room\n"
-        Main.playerManager ! PlayerManager.SendMessage(msg2, position, true) //send msg to server
+        Server.playerManager ! PlayerManager.SendMessage(msg2, position, true) //send msg to server
       } else ps.println("Leon's poor map building skills prevent you from going this way.\n")
     }
 
@@ -56,14 +59,15 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
         _items += itemOp.get
         ps.println(itemOp.get.name + " was added to your inventory\n")
         val msg = name + " has grabbed the " + itemOp.get.name + "\n"
-        Main.playerManager ! PlayerManager.SendMessage(msg, position, true)
+        Server.playerManager ! PlayerManager.SendMessage(msg, position, true)
       } else ps.println("that item is not here.\n")
     }
 
-    case AssignStartingRoom(startPos) => {
+    case CharacterMessages.AssignStartingRoom(startPos) => {
       _position = startPos
+      position ! Room.AddToRoom(self)
       val msg = name + " has entered the room\n"
-      Main.playerManager ! PlayerManager.SendMessage(msg, position, true) //send msg to server
+      Server.playerManager ! PlayerManager.SendMessage(msg, position, true) //send msg to server
       position ! Room.PrintDescription
     }
 
@@ -91,13 +95,13 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
   def processTell(command: String) = {
     val addressee = command.split(" ")(1)
     val msg = name + " tells you: " + command.takeRight(command.size - addressee.size - "tell  ".size) + "\n"
-    Main.playerManager ! PlayerManager.SendPrivateMessage(msg, addressee)
+    Server.playerManager ! PlayerManager.SendPrivateMessage(msg, addressee)
   }
 
   def processSay(command: String) = {
     val dialogue = command.takeRight(command.size - "say ".size) + "\n"
     val msg = name + " says: " + dialogue
-    Main.playerManager ! PlayerManager.SendMessage(msg, position, true)
+    Server.playerManager ! PlayerManager.SendMessage(msg, position, true)
     ps.println("You said: " + dialogue)
   }
 
@@ -108,7 +112,7 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
       ps.println("You dropped " + itemOp.get.name + " from your inventory.\n")
       position ! Room.DropItem(itemOp.get)
       val msg = name + " dropped the " + itemOp.get.name + "\n"
-      Main.playerManager ! PlayerManager.SendMessage(msg, position, true)
+      Server.playerManager ! PlayerManager.SendMessage(msg, position, true)
     } else ps.println("You don't have that in your inventory.\n")
   }
 
@@ -148,7 +152,6 @@ object Player {
 
   //Messages from room
   case class PrintRoom(roomDesc: String)
-  case class TakeExit(roomOp: Option[ActorRef], dir: Int)
   case class TakeItem(itemOp: Option[Item])
 
   //Messages from PlayerManager

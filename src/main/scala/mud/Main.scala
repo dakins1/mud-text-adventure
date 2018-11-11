@@ -12,13 +12,17 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.ServerSocket
 
-object Main extends App {
+object Server extends App {
   val system = ActorSystem("ActorMud")
   val roomManager = system.actorOf(Props(new RoomManager), "RoomManager")
   val playerManager = system.actorOf(Props(new PlayerManager), "PlayerManager")
+  val npcManager = system.actorOf(Props(new NPC_Manager), "NPC_Manager")
+  npcManager ! NPC_Manager.NewNPC("Barnabus")
 
   system.scheduler.schedule(1.seconds, 0.1.seconds, playerManager, PlayerManager.CheckAllInput)
+  system.scheduler.schedule(1.seconds, 0.1.seconds, npcManager, NPC_Manager.PrintPos)
 
+  
   val ss = new ServerSocket(4040)
 
   while (true) {

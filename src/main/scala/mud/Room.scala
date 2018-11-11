@@ -16,11 +16,13 @@ class Room(
   private var exits: Array[Option[ActorRef]] = null
 
   import Room._
-
+  
+  private var memberList = Buffer.empty[ActorRef] 
+  
   def receive = {
 
     case GetExit(dir) =>
-      sender ! Player.TakeExit(getExit(dir), dir)
+      sender ! CharacterMessages.TakeExit(getExit(dir), dir)
 
     case GetItem(itemName: String) => {
       val i = items.find(i => i.name == itemName)
@@ -30,6 +32,12 @@ class Room(
 
     case DropItem(item: Item) =>
       _items += item
+      
+    case AddToRoom(player:ActorRef) =>
+      memberList += player
+      
+    case RemoveFromRoom(player:ActorRef) =>
+      memberList -= player
 
     case PrintDescription =>
       {
@@ -37,11 +45,14 @@ class Room(
         masterString += "Available items: \n"
         if (items.size >= 1) items.foreach(s => masterString += s.name + " - " + s.desc + "\n")
         else masterString += "None\n"
+        masterString += "Players here: \n"
+        if (memberList.size >= 1) memberList.foreach(s => masterString += s.path.name.toString() + "\n")
+        else masterString += "None\n"
         masterString += "Exits: \n"
         for (e <- exits) {
           if (e != None) {
             masterString += e.get.path.name.toString() + " is to the " + directionArray(exits.indexOf(e)).toString() + '\n'
-            //Main.roomManager ! RoomManager.PrintExitsRequest(e, sender) //directionArray(exits.indexOf(i)) + '\n'
+            //Server.roomManager ! RoomManager.PrintExitsRequest(e, sender) //directionArray(exits.indexOf(i)) + '\n'
           }
         }
         sender ! Player.PrintRoom(masterString)
@@ -67,6 +78,8 @@ class Room(
 
 object Room {
   //Messages sent by Players
+  case class AddToRoom(player:ActorRef)
+  case class RemoveFromRoom(player:ActorRef)
   case class GetExit(dir: Int)
   case object PrintDescription // Doesn't print here. Tells player to print.
   case class GetItem(itemName: String)

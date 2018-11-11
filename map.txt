@@ -1,4 +1,4 @@
-3
+5
 bang
 Bang_Chamber
 A room with a bunk bed. There is intense mood lighting.
@@ -9,14 +9,14 @@ ping_pong_tray,a tray full of items necessary to play ping pong
 bush
 Smelly_Bush
 This bush is off the beaten path, but has clearly been recently rustled by somebody. There is an odd smell of skunk. 
--1,bang,-1,-1,-1,-1
+-1,bang,oakmont,-1,-1,-1
 2
 aperture,a mysterious glass aperture. The inside is coated with an odd residue
 bag,a drawstring bag
 prassel
 Prassel_310
 Room 310 of the Prassel dormitory. The entire room smells like sweaty buttcrack.
--1,-1,-1,bang,-1,-1
+oakmont,csi,-1,bang,-1,-1
 9
 xbox,the first xbox one from P310
 xbox_2,the second xbox one from P310
@@ -27,3 +27,17 @@ tv_3,the THIRD tv from P310
 flatscreen, a 13-inch, flat-screen TV
 board,a white board with an "argument score" on it. It seems like "Dillon" is winning.
 dresser,a dresser that looks oddly like the dressers from Herndon...
+csi
+CSI_388
+Where you are right now.
+prassel,-1,-1,-1,-1,-1
+2
+linux_computer,a computer running linux.
+windows_computer,a computer running windows. Burn it!
+oakmont
+Danny_Andersons_House
+A lovely house where Trinity's chief storyteller resides.
+-1,prassel,-1,bush,-1,-1
+2
+notebook,a tool used for storytelling.
+baseball_cap,something you where to make yourself seem more approachable

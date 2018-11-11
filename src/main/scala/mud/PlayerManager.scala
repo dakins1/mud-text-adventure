@@ -13,7 +13,7 @@ class PlayerManager extends Actor {
     case NewPlayer(name, sock, ps, br) => {
       val p = context.actorOf(Props(new Player(name, sock, ps, br)), name)
       p ! Player.Initialize
-      //Main.roomManager ! RoomManager.GetRandomRoom(p)
+      //Server.roomManager ! RoomManager.GetRandomRoom(p)
       val msg = name + " has joined the game \n"
       //for(child <- context.children; if child != sender) child ! Player.PrintMessage(msg, null, false)
     }
@@ -33,14 +33,10 @@ class PlayerManager extends Actor {
     case CheckAllInput =>
       for (child <- context.children) child ! Player.CheckInput
 
-    case TakeStartingRoom(startPos, player) =>
-      player ! Player.AssignStartingRoom(startPos)
   }
 }
 
 object PlayerManager {
-  //Messages from Room Manager
-  case class TakeStartingRoom(startPos: ActorRef, player: ActorRef)
   
   //Messages from Player
   case class SendPrivateMessage(str:String, addressee:String)
@@ -51,7 +47,7 @@ object PlayerManager {
      * Otherwise, set roomSpecial to false and set room to null
      */
   
-  //Messages from Main
+  //Messages from Server
   case class NewPlayer(name: String, sock: Socket, ps: PrintStream, br:BufferedReader)
   case object CheckAllInput
 }
