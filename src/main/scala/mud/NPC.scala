@@ -14,14 +14,18 @@ class NPC(name:String) extends Actor {
       Server.roomManager ! RoomManager.GetRandomRoom(self)
       
     case PrintPos =>
-      println(position.path.name)
+      println(self.path.name + ": " + position.path.name)
       
+    case Schedule(count) =>
+      Server.activityManager ! ActivityManager.ScheduleActivity(count + util.Random.nextInt(10), NPC.Move, self)      
+//      println("npc schedules activity")
       
     case CharacterMessages.AssignStartingRoom(startPos) =>
       position = startPos
 
     case Move => 
       position ! Room.GetExit(util.Random.nextInt(6)) //TODO figure out way to pass in exit
+//      println("move attempted")
       
     case CharacterMessages.TakeExit(roomOp, dir) =>
       if (roomOp != None) {
@@ -35,14 +39,14 @@ class NPC(name:String) extends Actor {
         Server.playerManager ! PlayerManager.SendMessage(msg2, position, true) //send msg to server
       }
     
-    case _ => 
-      println("unhandled message in NPC")
+    case m => 
+      println("unhandled message in NPC" + m.toString())
   }
 }
 
 object NPC {
-  
   case class AssignStartingRoom(startPos:ActorRef)
+  case class Schedule(count:Int)
   case object Initialize
   case object PrintPos
   case object Move

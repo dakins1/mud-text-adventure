@@ -17,11 +17,18 @@ object Server extends App {
   val roomManager = system.actorOf(Props(new RoomManager), "RoomManager")
   val playerManager = system.actorOf(Props(new PlayerManager), "PlayerManager")
   val npcManager = system.actorOf(Props(new NPC_Manager), "NPC_Manager")
+  val activityManager = system.actorOf(Props(new ActivityManager), "ActivityManager")
   npcManager ! NPC_Manager.NewNPC("Barnabus")
+//  npcManager ! NPC_Manager.NewNPC("Caecilius")
+//  npcManager ! NPC_Manager.NewNPC("Grumio")
+  
+  val x = new SAPriorityQueue[Int](_ < _)
+  for (i <- 1 to 10) x.enqueue(util.Random.nextInt(15))
+  for (i <- 1 to 10) println(x.dequeue())
 
   system.scheduler.schedule(1.seconds, 0.1.seconds, playerManager, PlayerManager.CheckAllInput)
   system.scheduler.schedule(1.seconds, 0.1.seconds, npcManager, NPC_Manager.PrintPos)
-
+  system.scheduler.schedule(1.seconds, 0.1.seconds, activityManager, ActivityManager.CheckQueue)
   
   val ss = new ServerSocket(4040)
 

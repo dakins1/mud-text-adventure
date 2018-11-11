@@ -8,6 +8,4 @@ object CharacterMessages {
   
   case class TakeExit(roomOp: Option[ActorRef], dir: Int)
   
-  
-
 }
