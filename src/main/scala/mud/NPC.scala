@@ -18,23 +18,22 @@ class NPC(name:String) extends Actor {
       
     case Schedule(count) =>
       Server.activityManager ! ActivityManager.ScheduleActivity(count + util.Random.nextInt(10), NPC.Move, self)      
-//      println("npc schedules activity")
       
     case CharacterMessages.AssignStartingRoom(startPos) =>
       position = startPos
+      startPos ! Room.AddToRoom(self)
 
     case Move => 
-      position ! Room.GetExit(util.Random.nextInt(6)) //TODO figure out way to pass in exit
-//      println("move attempted")
+      position ! Room.GetExit(util.Random.nextInt(6)) 
       
     case CharacterMessages.TakeExit(roomOp, dir) =>
       if (roomOp != None) {
         val msg1 = name + " has gone " + directionArray(dir) + "\n"
+        println(msg1)
         Server.playerManager ! PlayerManager.SendMessage(msg1, position, true) //send msg to server
         position ! Room.RemoveFromRoom(self)
         position = roomOp.get
         position ! Room.AddToRoom(self)
-        roomOp.get ! Room.PrintDescription //should send message to the player
         val msg2 = name + " has entered the room\n"
         Server.playerManager ! PlayerManager.SendMessage(msg2, position, true) //send msg to server
       }

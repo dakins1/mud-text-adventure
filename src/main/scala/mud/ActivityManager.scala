@@ -8,23 +8,21 @@ class ActivityManager extends Actor {
 
   val schedule = new SAPriorityQueue[(Int, Any, ActorRef)](_._1 < _._1)
   private var counter = 0
-  
+
   def receive = {
     case CheckQueue => {
       val command = schedule.peek
-      if (command != null) {
-        if (command._1 == counter) { 
-          val tmp = schedule.dequeue()
-          tmp._3 ! tmp._2 
-        }
+      if (command != null && command._1 == counter) {
+        val tmp = schedule.dequeue()
+        tmp._3 ! tmp._2
       }
       counter += 1
-      if (counter%10 == 0) Server.npcManager ! NPC_Manager.CreateActivity(counter)
+      if (counter % 50 == 0) Server.npcManager ! NPC_Manager.CreateActivity(counter) //schedule every 10 seconds
     }
 
-    case ScheduleActivity(delay, message, sender) =>  
+    case ScheduleActivity(delay, message, sender) =>
       schedule.enqueue(delay, message, sender)
-      
+
     case _ =>
       println("Unhandled message in ActivityManager")
   }
@@ -32,5 +30,5 @@ class ActivityManager extends Actor {
 
 object ActivityManager {
   case object CheckQueue
-  case class ScheduleActivity(delay:Int, message:Any, sender:ActorRef)
+  case class ScheduleActivity(delay: Int, message: Any, sender: ActorRef)
 }
