@@ -11,17 +11,19 @@ class ActivityManager extends Actor {
 
   def receive = {
     case CheckQueue => {
-      val command = schedule.peek
-      if (command != null && command._1 == counter) {
+      while (!schedule.isEmpty && schedule.peek._1 <= counter) {
         val tmp = schedule.dequeue()
         tmp._3 ! tmp._2
       }
       counter += 1
-      if (counter % 50 == 0) Server.npcManager ! NPC_Manager.CreateActivity(counter) //schedule every 10 seconds
+//      if (counter % 50 == 0) Server.npcManager ! NPC_Manager.CreateActivity //schedule something for NPCs every 10 seconds
     }
 
-    case ScheduleActivity(delay, message, sender) =>
-      schedule.enqueue(delay, message, sender)
+    case ScheduleActivity(delay, message, recipient) =>
+      schedule.enqueue(delay + counter + 5, message, recipient)
+
+    case PrintCount =>
+      println("current counter " + counter)
 
     case _ =>
       println("Unhandled message in ActivityManager")
@@ -29,6 +31,8 @@ class ActivityManager extends Actor {
 }
 
 object ActivityManager {
+  case object Kill
   case object CheckQueue
-  case class ScheduleActivity(delay: Int, message: Any, sender: ActorRef)
+  case class ScheduleActivity(delay: Int, message: Any, recipient: ActorRef)
+  case object PrintCount
 }

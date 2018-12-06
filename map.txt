@@ -5,39 +5,58 @@ A room with a bunk bed. There is intense mood lighting.
 bush,-1,prassel,-1,-1,-1
 2
 lava_lamp,a cool device from the 60s. It adds a mood to the room.
+10,5,10
 ping_pong_tray,a tray full of items necessary to play ping pong
+10,5,8
 bush
 Smelly_Bush
 This bush is off the beaten path, but has clearly been recently rustled by somebody. There is an odd smell of skunk. 
 -1,bang,oakmont,-1,-1,-1
-2
+3
 aperture,a mysterious glass aperture. The inside is coated with an odd residue
+15,1,5
 bag,a drawstring bag
+2,1,2
+op,an op weapons
+3,20,25
 prassel
 Prassel_310
 Room 310 of the Prassel dormitory. The entire room smells like sweaty buttcrack.
 oakmont,csi,-1,bang,-1,-1
 9
 xbox,the first xbox one from P310
+5,5,12
 xbox_2,the second xbox one from P310
+5,5,12
 xbox_3,the THIRD xbox one from P310
+5,5,12
 tv,the first tv from P310
+3,10,15 
 tv_2,the second tv from P310
+3,10,15
 tv_3,the THIRD tv from P310
+3,10,15
 flatscreen, a 13-inch, flat-screen TV
+15,5,15
 board,a white board with an "argument score" on it. It seems like "Dillon" is winning.
+10,5,10
 dresser,a dresser that looks oddly like the dressers from Herndon...
+1,20,30
 csi
 CSI_388
 Where you are right now.
 prassel,-1,-1,-1,-1,-1
 2
 linux_computer,a computer running linux.
+3,8,12
 windows_computer,a computer running windows. Burn it!
+1,1,1
 oakmont
 Danny_Andersons_House
 A lovely house where Trinity's chief storyteller resides.
 -1,prassel,-1,bush,-1,-1
 2
 notebook,a tool used for storytelling.
+5,3,5
 baseball_cap,something you where to make yourself seem more approachable
+5,3,5

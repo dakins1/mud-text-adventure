@@ -18,20 +18,18 @@ object Server extends App {
   val playerManager = system.actorOf(Props(new PlayerManager), "PlayerManager")
   val npcManager = system.actorOf(Props(new NPC_Manager), "NPC_Manager")
   val activityManager = system.actorOf(Props(new ActivityManager), "ActivityManager")
-  npcManager ! NPC_Manager.NewNPC("Caecilius")
-  npcManager ! NPC_Manager.NewNPC("Grumio")
-  npcManager ! NPC_Manager.NewNPC("Clemens")
-  npcManager ! NPC_Manager.NewNPC("Matella")
-  npcManager ! NPC_Manager.NewNPC("Quintus")
-  npcManager ! NPC_Manager.NewNPC("Cogidubnus")
-  npcManager ! NPC_Manager.NewNPC("Barbillus")
+  /*
+  npcManager ! NPC_Manager.NewNPC("Caecilius",100)
+  npcManager ! NPC_Manager.NewNPC("Grumio",100)
+  npcManager ! NPC_Manager.NewNPC("Clemens",100)
+  npcManager ! NPC_Manager.NewNPC("Matella",100)
+  npcManager ! NPC_Manager.NewNPC("Quintus",100)
+  npcManager ! NPC_Manager.NewNPC("Cogidubnus",100)
+  npcManager ! NPC_Manager.NewNPC("Barbillus",100)
+	*/
+  npcManager ! NPC_Manager.StartMovement
   
-  val x = new SAPriorityQueue[Int](_ < _)
-  for (i <- 1 to 10) x.enqueue(util.Random.nextInt(15))
-  for (i <- 1 to 10) println(x.dequeue())
-
   system.scheduler.schedule(1.seconds, 0.1.seconds, playerManager, PlayerManager.CheckAllInput)
-//  system.scheduler.schedule(1.seconds, 0.1.seconds, npcManager, NPC_Manager.PrintPos)
   system.scheduler.schedule(1.seconds, 0.1.seconds, activityManager, ActivityManager.CheckQueue)
   
   val ss = new ServerSocket(4040)

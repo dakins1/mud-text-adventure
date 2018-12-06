@@ -38,20 +38,25 @@ class Room(
       
     case RemoveFromRoom(player:ActorRef) =>
       memberList -= player
-
+      
+    case Attendance(name:String) =>
+      sender ! CharacterMessages.StartKill(memberList.find(i => i.path.name == name))
+      
+      
     case PrintDescription =>
       {
         var masterString: String = ("\n " + name + "\n" + desc + "\n")
         masterString += "Available items: \n"
-        if (items.size >= 1) items.foreach(s => masterString += s.name + " - " + s.desc + "\n")
+        if (items.size >= 1) items.foreach(s => masterString += s.name + " - " + s.desc + "\n" + 
+            "     speed: " + s.speed + ", attack range: " + s.baseAttack + "-" + s.maxAttack + "\n")
         else masterString += "None\n"
         masterString += "Players here: \n"
-        if (memberList.size >= 1) memberList.foreach(s => masterString += s.path.name.toString() + "\n")
+        if (memberList.size >= 1) memberList.foreach(s => masterString += "    " + s.path.name.toString() + "\n")
         else masterString += "None\n"
         masterString += "Exits: \n"
         for (e <- exits) {
           if (e != None) {
-            masterString += e.get.path.name.toString() + " is to the " + directionArray(exits.indexOf(e)).toString() + '\n'
+            masterString += "    " + e.get.path.name.toString() + " is to the " + directionArray(exits.indexOf(e)).toString() + '\n'
             //Server.roomManager ! RoomManager.PrintExitsRequest(e, sender) //directionArray(exits.indexOf(i)) + '\n'
           }
         }
@@ -84,6 +89,7 @@ object Room {
   case object PrintDescription // Doesn't print here. Tells player to print.
   case class GetItem(itemName: String)
   case class DropItem(item: Item)
+  case class Attendance(name:String)
 
   //Sent by RoomManager
   case class LinkExits(rooms: Map[String, ActorRef])

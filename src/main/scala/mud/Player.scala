@@ -14,8 +14,24 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
   //Data Members
   private var _position: ActorRef = null
   def position = _position
-  private var _items = Buffer.empty[Item]
+  private val fists = Item((name + "'s_fisticuffs"), (name + "'s bare fists."), 10, 5, 10)
+  private var _items = Buffer.empty[Item] += fists
   def items = _items
+  private var _health = 100
+  def health = _health
+  private var equippedItem: Item = fists
+  private var victim: ActorRef = null.asInstanceOf[ActorRef]
+  private var inCombat: Boolean = false
+  private def itemDamage = {
+    if (equippedItem != null) {
+      equippedItem.baseAttack + util.Random.nextInt(equippedItem.maxAttack - equippedItem.baseAttack)
+    } else 0
+  }
+  private def itemSpeed = {
+    if (equippedItem != null) equippedItem.speed
+    else 0
+  }
+
   val directionArray = List("north", "south", "east", "west", "up", "down")
 
   def receive = {
@@ -43,7 +59,7 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
         roomOp.get ! Room.PrintDescription //should send message to the player
         val msg2 = name + " has entered the room\n"
         Server.playerManager ! PlayerManager.SendMessage(msg2, position, true) //send msg to server
-      } else ps.println("Leon's poor map building skills prevent you from going this way.\n")
+      } else if (!inCombat) ps.println("Leon's poor map building skills prevent you from going this way.\n")
     }
 
     case PrintRoom(roomDesc) =>
@@ -63,6 +79,58 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
       } else ps.println("that item is not here.\n")
     }
 
+    case CharacterMessages.StartKill(actorOp) =>
+      if (actorOp != None) {
+        inCombat = true
+        victim = actorOp.get
+        Server.activityManager ! ActivityManager.ScheduleActivity(
+          itemSpeed, CharacterMessages.Kill, self)
+      } else ps.println("That player is not in this room.\n")
+
+    case CharacterMessages.Kill =>
+      if (/*victim != null &&*/  inCombat && health>0) {
+        ps.println("You attack " + victim.path.name + "!\n")
+        //victim ! VictimAssignment //don't know about this one
+        victim ! CharacterMessages.Attack(itemDamage, position)
+        Server.activityManager ! ActivityManager.ScheduleActivity(itemSpeed, CharacterMessages.Kill, self)
+      }
+
+    case VictimAssignment =>
+      victim = sender
+      
+    case CharacterMessages.Attack(damage, room) =>
+      if (/*victim != null &&*/ room == position && health>0) {
+        inCombat = true
+        victim = sender
+        _health -= damage
+        ps.println(victim.path.name + " attacked you!")
+        ps.println("Damage dealt: " + damage + ", Your health: " + health + "\n")
+        if (health > 0) {
+          if (inCombat) Server.activityManager ! ActivityManager.ScheduleActivity(itemSpeed, CharacterMessages.Kill, self)
+        } else {
+          inCombat = false
+          victim ! CharacterMessages.EndCombat(Died())
+          victim = null.asInstanceOf[ActorRef]
+          ps.println("You died. Sowwy!")
+        }
+      } else { 
+        sender ! CharacterMessages.EndCombat(NotInRoom())
+        //victim = null.asInstanceOf[ActorRef]
+      }
+
+    case EndCombat(result) => {
+      inCombat = false
+      if (victim != null) {
+        result match {
+          case _: Died => ps.println(sender.path.name + " died.\n")
+          case _: NotInRoom => ps.println(sender.path.name + " is no longer in the room.\n")
+          case _: Fled => ps.println(sender.path.name + " has fled!\n")
+          case _ => ps.println("Unhandled message in EndCombat match")
+        }
+      victim = null.asInstanceOf[ActorRef]
+      }
+    }
+
     case CharacterMessages.AssignStartingRoom(startPos) => {
       _position = startPos
       position ! Room.AddToRoom(self)
@@ -74,23 +142,30 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
     case m => println("Unhandled message in Player")
   }
 
-  def processCommand(command: String): Unit = command.split(" ")(0) match {
-    case "north" => move(0)
-    case "south" => move(1)
-    case "east" => move(2)
-    case "west" => move(3)
-    case "up" => move(4)
-    case "down" => move(5)
-    case "say" => processSay(command)
-    case "tell" => processTell(command)
-    case "look" => position ! Room.PrintDescription
-    case "drop" if (command.split(" ").size == 2) => dropInv(command.split(" ")(1))
-    case "grab" if (command.split(" ").size == 2) => addInv(command.split(" ")(1))
-    case "i" => ps.println(inventoryListing)
-    case _ => ps.println("??????????? \n ???? ??? \n??? ?????????? ? \n       ???\n?\n")
-  }
+  def processCommand(command: String): Unit =
+    command.split(" ")(0) match {
+      case "north" => move(0)
+      case "south" => move(1)
+      case "east" => move(2)
+      case "west" => move(3)
+      case "up" => move(4)
+      case "down" => move(5)
+      case "flee" => flee()
+      case "say" => processSay(command)
+      case "tell" => processTell(command)
+      case "look" => position ! Room.PrintDescription
+      case "drop" if (command.split(" ").size == 2) => dropInv(command.split(" ")(1))
+      case "grab" if (command.split(" ").size == 2) => addInv(command.split(" ")(1))
+      case "i" => printInfo()
+      case "equip" if (command.split(" ").size == 2) => equip(command.split(" ")(1))
+      case "equipped" => printEquip()
+      case "unequip" => unequip()
+      case "kill" if (command.split(" ").size == 2) => inquireKill(command.split(" ")(1))
+      case "reset" => _health = 100
+      case _ => ps.println("??????????? \n ???? ??? \n??? ?????????? ? \n       ???\n?\n")
+    }
 
-  //Helper functions
+/***Helper functions***/
 
   def processTell(command: String) = {
     val addressee = command.split(" ")(1)
@@ -110,24 +185,80 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
     if (itemOp != None) {
       _items -= itemOp.get
       ps.println("You dropped " + itemOp.get.name + " from your inventory.\n")
+      if (equippedItem == itemOp.get) unequip()
       position ! Room.DropItem(itemOp.get)
       val msg = name + " dropped the " + itemOp.get.name + "\n"
       Server.playerManager ! PlayerManager.SendMessage(msg, position, true)
     } else ps.println("You don't have that in your inventory.\n")
   }
 
+  //Equipment and inventory
+
   def addInv(itemName: String): Unit = {
     position ! Room.GetItem(itemName)
   }
 
-  def inventoryListing: String = {
-    var inventory = ""
-    for (i <- _items) inventory += (i.name + " - " + i.desc + "\n")
-    inventory
+  def equip(itemName: String): Unit = {
+    val i = items.find(s => s.name == itemName)
+    if (i != None) {
+      equippedItem = i.get
+      ps.println("You have equipped " + i.get.name + "\n")
+    }
   }
 
+  /*
+   * Fists will automatically be equipped after unequipping an item,
+   * But if user unequips fists, then they will have nothing equipped
+   */
+  def unequip() {
+    if (equippedItem != null) {
+      if (items.contains(fists)) {
+        ps.println("You unequipped " + equippedItem.name + "\n")
+        if (equippedItem == fists) equippedItem = null.asInstanceOf[Item]
+        else equippedItem = fists
+      } else {
+        ps.println("You unequipped " + equippedItem.name + ", and now you are defenseless.\n")
+        equippedItem = null.asInstanceOf[Item]
+      }
+    } else ps.println("You have nothing to unequip. You were and still are defenseless.\n")
+  }
+
+  def printEquip() {
+    if (equippedItem != null) ps.println(equippedItem.name + " is equipped\n")
+    else ps.println("You have nothing equipped. You are defenseless!\n")
+  }
+
+  def printInfo():Unit = {
+    ps.println("Health: " + health)
+    printEquip()
+    var inventory = ""
+    for (i <- _items) inventory += (i.name + " - " + i.desc + "\n" +
+      "    speed: " + i.speed + ", attack range: " + i.baseAttack + "-" + i.maxAttack + "\n")
+    ps.println(inventory)
+  }
+
+  //Killing
+
+  def inquireKill(victimName: String): Unit = {
+    position ! Room.Attendance(victimName)
+  }
+
+  //Movement
+  
   def move(dir: Int): Unit = { //make this send a message asking for a room
-    position ! Room.GetExit(dir)
+    if (!inCombat) position ! Room.GetExit(dir)
+    else ps.println("Nice try\n")
+  }
+  
+  //TODO
+  def flee():Unit = {
+    if (util.Random.nextInt(3) == 0) {
+      victim ! EndCombat(Fled())
+      val tmp = position
+      for (i <- 0 to 5)
+        position ! Room.GetExit(i)
+      inCombat = false
+    } else ps.println("Leon's poor map building skills prevent you from fleeing!")
   }
 
   //Game info
@@ -137,7 +268,7 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
 -To pick up an item, type "grab" and then the name of the item. 
 -To drop an item, type "drop" and then the name of the item. 
 -To view your inventory, simply type "i".
--To look around your current room, type "look".
+-To look around your current room, type "look"
 -If you want to quit, type "quit".
 -Make sure to keep all commands lowercase. Have fun.
 

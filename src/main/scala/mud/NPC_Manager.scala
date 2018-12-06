@@ -10,13 +10,13 @@ class NPC_Manager extends Actor {
 
   
   def receive = {
-    case NewNPC(name:String) => {
-      val n = context.actorOf(Props(new NPC(name)), name)
+    case NewNPC(name:String, health:Int) => {
+      val n = context.actorOf(Props(new NPC(name, health)), name)
       n ! NPC.Initialize
     }
     
-    case CreateActivity(count) =>
-      for (c <- context.children) c ! NPC.Schedule(count)
+    case StartMovement =>
+      for (c <- context.children) c ! NPC.Schedule
     
     case PrintPos => 
       for (c <- context.children) c ! NPC.PrintPos
@@ -26,7 +26,7 @@ class NPC_Manager extends Actor {
 }
 
 object NPC_Manager {
-  case class NewNPC(name:String)
-  case class CreateActivity(count: Int)
+  case class NewNPC(name:String, health:Int)
+  case object StartMovement
   case object PrintPos
 }

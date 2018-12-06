@@ -29,6 +29,6 @@ class SAPriorityQueue[A: ClassTag](higherP: (A, A) => Boolean) {
   
   def isEmpty: Boolean = numElems == 0
 
-  def peek: A = arr(0)
+  def peek: A = if (isEmpty) arr(0) else arr(numElems-1)
 }
 
