@@ -6,7 +6,7 @@ import akka.actor.ActorRef
 class ActivityManager extends Actor {
   import ActivityManager._
 
-  val schedule = new SAPriorityQueue[(Int, Any, ActorRef)](_._1 < _._1)
+  val schedule = new BinaryHeap[(Int, Any, ActorRef)](_._1 < _._1)
   private var counter = 0
 
   def receive = {

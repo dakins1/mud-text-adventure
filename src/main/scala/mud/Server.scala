@@ -18,7 +18,7 @@ object Server extends App {
   val playerManager = system.actorOf(Props(new PlayerManager), "PlayerManager")
   val npcManager = system.actorOf(Props(new NPC_Manager), "NPC_Manager")
   val activityManager = system.actorOf(Props(new ActivityManager), "ActivityManager")
-  /*
+  
   npcManager ! NPC_Manager.NewNPC("Caecilius",100)
   npcManager ! NPC_Manager.NewNPC("Grumio",100)
   npcManager ! NPC_Manager.NewNPC("Clemens",100)
@@ -26,7 +26,7 @@ object Server extends App {
   npcManager ! NPC_Manager.NewNPC("Quintus",100)
   npcManager ! NPC_Manager.NewNPC("Cogidubnus",100)
   npcManager ! NPC_Manager.NewNPC("Barbillus",100)
-	*/
+	
   npcManager ! NPC_Manager.StartMovement
   
   system.scheduler.schedule(1.seconds, 0.1.seconds, playerManager, PlayerManager.CheckAllInput)
