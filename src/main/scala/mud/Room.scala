@@ -64,6 +64,7 @@ class Room(
       }
     case LinkExits(rooms) =>
       exits = exitKeys.map(key => rooms.get(key))
+      Server.roomManager ! RoomManager.SendExits(name, keyword, exitKeys)
 
     case m =>
       println("Unhandled message in Room: " + m)
@@ -92,6 +93,6 @@ object Room {
   case class Attendance(name:String)
 
   //Sent by RoomManager
-  case class LinkExits(rooms: Map[String, ActorRef])
+  case class LinkExits(rooms: BSTMap[String, ActorRef])
 
 }

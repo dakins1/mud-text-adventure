@@ -6,6 +6,7 @@ import scala.collection.mutable.Buffer
 import java.io.PrintStream
 import java.io.BufferedReader
 import java.net.Socket
+import scala.collection.mutable.Queue
 
 class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader) extends Actor {
   import Player._
@@ -31,6 +32,7 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
     if (equippedItem != null) equippedItem.speed
     else 0
   }
+  private var roomInfo:Map[String,String] = null
 
   val directionArray = List("north", "south", "east", "west", "up", "down")
 
@@ -38,11 +40,16 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
     case Initialize =>
       ps.print(hello)
       ps.print(instructions)
+      ps.println("Press enter to continue.")
       br.readLine()
       Server.roomManager ! RoomManager.GetRandomRoom(self)
+      Server.roomManager ! RoomManager.GetRoomInfo
       val msg = name + " has joined the game \n"
       Server.playerManager ! PlayerManager.SendMessage(msg, null, false)
 
+    case TakeRoomInfo(info) =>
+      roomInfo = info
+      
     case CheckInput =>
       if (br.ready()) {
         val input = br.readLine()
@@ -70,6 +77,11 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
         if (room == position) ps.println(str)
       } else ps.println(str)
 
+    case TakeShortestPath(queue) =>
+      ps.println("Shortest path: ")
+      while (queue.size > 1) ps.print(queue.dequeue() + ", ")
+      ps.println(queue.dequeue)
+      
     case TakeItem(itemOp) => {
       if (itemOp != None) {
         _items += itemOp.get
@@ -138,7 +150,11 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
       Server.playerManager ! PlayerManager.SendMessage(msg, position, true) //send msg to server
       position ! Room.PrintDescription
     }
-
+    
+    case PrintPrivateMsg(msg) =>
+      ps.println(msg)
+      ps.println()
+      
     case m => println("Unhandled message in Player")
   }
 
@@ -161,12 +177,18 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
       case "equipped" => printEquip()
       case "unequip" => unequip()
       case "kill" if (command.split(" ").size == 2) => inquireKill(command.split(" ")(1))
+      case "shortestPath" if (command.split(" ").size == 2) => shortestPath(command.split(" ")(1))
       case "reset" => _health = 100
+      case "help" => ps.println(instructions)
       case _ => ps.println("??????????? \n ???? ??? \n??? ?????????? ? \n       ???\n?\n")
     }
 
 /***Helper functions***/
 
+  def shortestPath(dest:String):Unit = {
+    Server.roomManager ! RoomManager.GetShortestPath(position.path.name, dest)
+  }
+  
   def processTell(command: String) = {
     val addressee = command.split(" ")(1)
     val msg = name + " tells you: " + command.takeRight(command.size - addressee.size - "tell  ".size) + "\n"
@@ -267,12 +289,26 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
   val instructions = """-To move around, type in a direction (i.e. north, south, east, etc.).
 -To pick up an item, type "grab" and then the name of the item. 
 -To drop an item, type "drop" and then the name of the item. 
--To view your inventory, simply type "i".
--To look around your current room, type "look"
--If you want to quit, type "quit".
--Make sure to keep all commands lowercase. Have fun.
-
-Press enter to continue
+-To equip an item, type "equip" and then the name of the item.
+-Note: The lower your item's speed number is, the faster it actually is. 
+-To see what item you have equipped, type "equipped".
+-To unequip your equipped time, type "unequip". If your fists are
+  still in your inventory, those will be equipped by default. 
+-Speaking of inventory, to view your inventory, simply type "i".
+  This will also show you your health.
+-To look around your current room, type "look".
+-To send a message to your room, type "say " followed by your message.
+-To send a private message, type "tell ", the recipients exact name, 
+  then the message. You cannot talk to NPCs. But you can talk to yourself. 
+-To initiate an attack, type "kill " followed by your victim's name.
+-If you realize attacking was a mistake, you can try to flee. To do so,
+  just type "flee". There is a slim chance it will work, but you can try
+  to flee as many times as your typing speed will allow.
+-If you die, type "reset" to put your health back to 100. 
+-To find the shortest path to a location, type "shortestPath" followed
+  by the exact name of the destination. 
+-To repeat these instructions, type "help".
+-Have fun!
 
 """
 
@@ -280,7 +316,13 @@ Press enter to continue
 object Player {
   //Messages from God knows where
   case object CheckInput
-
+  case class PrintPrivateMsg(msg:String)
+  
+  //RoomManager
+  case class TakeShortestPath(path:Queue[String])
+  case class TakeRoomInfo(info:Map[String, String])
+  
+  
   //Messages from room
   case class PrintRoom(roomDesc: String)
   case class TakeItem(itemOp: Option[Item])

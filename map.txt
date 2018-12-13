@@ -1,4 +1,4 @@
-5
+8
 bang
 Bang_Chamber
 A room with a bunk bed. There is intense mood lighting.
@@ -45,7 +45,7 @@ dresser,a dresser that looks oddly like the dressers from Herndon...
 csi
 CSI_388
 Where you are right now.
-prassel,-1,-1,-1,-1,-1
+prassel,-1,skyline,-1,-1,-1
 2
 linux_computer,a computer running linux.
 3,8,12
@@ -54,9 +54,24 @@ windows_computer,a computer running windows. Burn it!
 oakmont
 Danny_Andersons_House
 A lovely house where Trinity's chief storyteller resides.
--1,prassel,-1,bush,-1,-1
+-1,prassel,chap,bush,-1,-1
 2
 notebook,a tool used for storytelling.
 5,3,5
 baseball_cap,something you where to make yourself seem more approachable
 5,3,5
+skyline
+Skyline
+Where fancy people have their fine dining.
+-1,-1,library,csi,-1,-1
+0
+library
+Library
+Where the books be.
+chap,-1,-1,skyline,-1,-1
+0
+chap
+Chapman
+A musty old building.
+-1,library,-1,oakmont,-1,-1,-1
+0
