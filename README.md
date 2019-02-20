@@ -15,7 +15,7 @@ To play this game, you need a bash terminal. This will not work on Windows.
   More than one client can play at once. One way to do this would be opening another local terminal,
   and entering "telnet localhost 4040" again. This does create a multiplayer game, but only one player
   can type at once. That's no fun. So, from another maching on a bash terminal, you can "telnet <sshName> 4040".
-  The sshName should be the name of the machine hosting the server. Then both machines can simultaneaously play
+  The sshName should be the name of the machine hosting the server. Then both machines can simultaneously play
   and interact with one another. 
   
   
