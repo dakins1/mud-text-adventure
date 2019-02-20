@@ -9,11 +9,11 @@ import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.Queue
 import scala.collection.mutable.Set
 
-//Mine
 
 class RoomManager extends Actor {
   import RoomManager._
 
+  //Data Members
   private var roomsInfo: TrieMap[String, Array[String]] = TrieMap.empty[String, Array[String]]
   private var roomKeywords: TrieMap[String, String] = TrieMap.empty[String, String]
   private var keywordsFlipped: TrieMap[String, String] = TrieMap.empty[String, String]
@@ -27,9 +27,7 @@ class RoomManager extends Actor {
     val lines = source.getLines()
     val rooms = Array.fill(lines.next().trim.toInt)(readRoom(lines))
     source.close()
-    new BSTMap[String, ActorRef](_<_).toBSTMap(rooms)
-//    var roomMap = BSTMap[String, String]
-//    for (p <- rooms) 
+    new BSTMap[String, ActorRef](_<_).toBSTMap(rooms) 
   }
 
   def readRoom(lines: Iterator[String]): (String, ActorRef) = {
@@ -62,13 +60,13 @@ class RoomManager extends Actor {
     val visited = Set.empty[String]
     var room = start
     while (room != dest) {
-      val p = (for (r <- roomsInfo(room); if r != "-1"; if !visited(r)) yield (r, helper(r, dest, roomsInfo)))
-      val l = for (t <- p) yield t._2
-      val i = p.indexWhere(s => s._2 == l.min) //p index of next room to take
-      val dir = directionArray(roomsInfo(room).indexOf(p(i)._1))
+      val path = (for (r <- roomsInfo(room); if r != "-1"; if !visited(r)) yield (r, helper(r, dest, roomsInfo)))
+      val lngth = for (t <- path) yield t._2
+      val i = path.indexWhere(s => s._2 == lngth.min) //index of next room to take
+      val dir = directionArray(roomsInfo(room).indexOf(path(i)._1))
       q.enqueue(dir)
       visited += room
-      room = p(i)._1
+      room = path(i)._1
     }
     q
   }

@@ -70,7 +70,7 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
     }
 
     case PrintRoom(roomDesc) =>
-      ps.println(roomDesc) //should print room desc...
+      ps.println(roomDesc) 
 
     case PrintMessage(str, room, roomSpecial) =>
       if (roomSpecial) {
@@ -100,9 +100,8 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
       } else ps.println("That player is not in this room.\n")
 
     case CharacterMessages.Kill =>
-      if (/*victim != null &&*/  inCombat && health>0) {
+      if (inCombat && health>0) {
         ps.println("You attack " + victim.path.name + "!\n")
-        //victim ! VictimAssignment //don't know about this one
         victim ! CharacterMessages.Attack(itemDamage, position)
         Server.activityManager ! ActivityManager.ScheduleActivity(itemSpeed, CharacterMessages.Kill, self)
       }
@@ -111,7 +110,7 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
       victim = sender
       
     case CharacterMessages.Attack(damage, room) =>
-      if (/*victim != null &&*/ room == position && health>0) {
+      if (room == position && health>0) {
         inCombat = true
         victim = sender
         _health -= damage
@@ -127,7 +126,6 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
         }
       } else { 
         sender ! CharacterMessages.EndCombat(NotInRoom())
-        //victim = null.asInstanceOf[ActorRef]
       }
 
     case EndCombat(result) => {
@@ -272,7 +270,6 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
     else ps.println("Nice try\n")
   }
   
-  //TODO
   def flee():Unit = {
     if (util.Random.nextInt(3) == 0) {
       victim ! EndCombat(Fled())
@@ -314,7 +311,7 @@ class Player(val name: String, sock: Socket, ps: PrintStream, br: BufferedReader
 
 }
 object Player {
-  //Messages from God knows where
+  //Messages from Main
   case object CheckInput
   case class PrintPrivateMsg(msg:String)
   

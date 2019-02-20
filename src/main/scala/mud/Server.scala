@@ -27,8 +27,6 @@ object Server extends App {
   npcManager ! NPC_Manager.NewNPC("Cogidubnus",100)
   npcManager ! NPC_Manager.NewNPC("Barbillus",100)
 
-  system.scheduler.schedule(3.seconds, 20.seconds, roomManager, RoomManager.TestPath("Skyline","Smelly_Bush"))
-//  system.scheduler.schedule(3.seconds, 5.seconds, roomManager, RoomManager.GetRoomInfo)
   
   
   npcManager ! NPC_Manager.StartMovement

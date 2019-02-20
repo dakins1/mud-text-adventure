@@ -18,6 +18,7 @@ class Room(
   import Room._
   
   private var memberList = Buffer.empty[ActorRef] 
+  val directionArray = List("north", "south", "east", "west", "up", "down")
   
   def receive = {
 
@@ -70,7 +71,10 @@ class Room(
       println("Unhandled message in Room: " + m)
   }
 
-  val directionArray = List("north", "south", "east", "west", "up", "down")
+  
+  
+  //Helper Functions
+  
   def items = _items
 
   def removeItem(itemToRemove: Item): Unit = _items = _items.filter(i => i.name != itemToRemove.name)

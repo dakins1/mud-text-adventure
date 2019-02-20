@@ -51,7 +51,6 @@ class NPC(name: String, private var _health:Int) extends Actor {
     case CharacterMessages.TakeExit(roomOp, dir) =>
       if (roomOp != None) {
         val msg1 = name + " has gone " + directionArray(dir) + "\n"
-        println(msg1)
         Server.playerManager ! PlayerManager.SendMessage(msg1, position, true) //send msg to server
         position ! Room.RemoveFromRoom(self)
         position = roomOp.get
@@ -69,8 +68,7 @@ class NPC(name: String, private var _health:Int) extends Actor {
           itemSpeed, CharacterMessages.Kill, self)
       }
     case CharacterMessages.Kill =>
-      if (/*victim != null &&*/  inCombat && health>0) {
-        //victim ! VictimAssignment //don't know about this one
+      if (inCombat && health>0) {
         victim ! CharacterMessages.Attack(itemDamage, position)
         Server.activityManager ! ActivityManager.ScheduleActivity(itemSpeed, CharacterMessages.Kill, self)
       }
@@ -79,7 +77,7 @@ class NPC(name: String, private var _health:Int) extends Actor {
       victim = sender
       
     case CharacterMessages.Attack(damage, room) =>
-      if (/*victim != null &&*/ room == position && health>0) {
+      if (room == position && health>0) {
         inCombat = true
         victim = sender
         _health -= damage
@@ -92,14 +90,12 @@ class NPC(name: String, private var _health:Int) extends Actor {
         }
       } else { 
         sender ! CharacterMessages.EndCombat(NotInRoom())
-        //victim = null.asInstanceOf[ActorRef]
       }
 
     case EndCombat(result) => {
       inCombat = false
       victim = null.asInstanceOf[ActorRef]
     }
-      
       
     case m =>
       println("unhandled message in NPC" + m.toString())

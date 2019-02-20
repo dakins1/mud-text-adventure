@@ -7,8 +7,6 @@ import akka.actor.Props
 class NPC_Manager extends Actor {
   import NPC_Manager._
   
-
-  
   def receive = {
     case NewNPC(name:String, health:Int) => {
       val n = context.actorOf(Props(new NPC(name, health)), name)

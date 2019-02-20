@@ -1,6 +1,6 @@
 8
 bang
-Bang_Chamber
+Bunk_Chamber
 A room with a bunk bed. There is intense mood lighting.
 bush,-1,prassel,-1,-1,-1
 2
@@ -21,7 +21,7 @@ op,an op weapons
 3,20,25
 prassel
 Prassel_310
-Room 310 of the Prassel dormitory. The entire room smells like sweaty buttcrack.
+Room 310 of the Prassel dormitory. The entire room smells very bad.
 oakmont,csi,-1,bang,-1,-1
 9
 xbox,the first xbox one from P310
